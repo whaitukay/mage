@@ -403,6 +403,47 @@ public class TokenImagesTest extends CardTestPlayerBase {
     }
 
     @Test
+    public void test_TokenMissingImage_MustReuseSimilarTokenImage_DaringPiracy() {
+        addCard(Zone.BATTLEFIELD, playerA, "J22-Daring Piracy");
+
+        setStrictChooseMode(true);
+        setStopAt(1, PhaseStep.POSTCOMBAT_MAIN);
+        execute();
+
+        assert_Inner("Daring Piracy", 0, 0, 1,
+                "Pirate Token", 1, false);
+
+        Set<String> tokenSetCodes = currentGame.getBattlefield().getAllPermanents()
+                .stream()
+                .filter(card -> card.getName().equals("Pirate Token"))
+                .map(Card::getExpansionSetCode)
+                .collect(Collectors.toSet());
+        Assert.assertFalse("must not fall back to XMAGE token image", tokenSetCodes.contains(TokenRepository.XMAGE_TOKENS_SET_CODE));
+        Assert.assertTrue("must use a 1/1 red Pirate token image, actual: " + tokenSetCodes,
+                tokenSetCodes.stream().allMatch(code -> code.equals("M21") || code.equals("CLB")));
+    }
+
+    @Test
+    public void test_TokenExists_MustUseCorrectSocSpiritImage_QuintoriusHistoryChaser() {
+        addCard(Zone.BATTLEFIELD, playerA, "SOC-Quintorius, History Chaser");
+        addCard(Zone.BATTLEFIELD, playerA, "Scavenging Ooze");
+        addCard(Zone.BATTLEFIELD, playerA, "Forest");
+        addCard(Zone.GRAVEYARD, playerA, "Opt");
+
+        activateAbility(1, PhaseStep.PRECOMBAT_MAIN, playerA, "{G}: Exile target card from a graveyard");
+        addTarget(playerA, "Opt");
+
+        setStrictChooseMode(true);
+        setStopAt(1, PhaseStep.BEGIN_COMBAT);
+        execute();
+
+        assertTokenCount(playerA, "Spirit Token", 1);
+        assertPowerToughness(playerA, "Spirit Token", 3, 2);
+        assertColor(playerA, "Spirit Token", "RW", true);
+        assert_TokenOrCardImageNumber("Spirit Token", Arrays.asList(1));
+    }
+
+    @Test
     public void test_TokenExists_MustGetRandomSetCodeOnAllUnknownSets() {
         // if a source's set don't have tokens then it must be random
         // https://github.com/magefree/mage/issues/10139
