@@ -172,9 +172,9 @@ public class CardLayoutStrategyImpl implements CardLayoutStrategy {
                 attachments++;
                 if (attachedPermanent.getAttachments() != null && !attachedPermanent.getAttachments().isEmpty()) {
                     AttachmentLayoutInfos attachmentLayoutInfos = calculateNeededNumberOfVerticalColumns(currentCol, battlefieldPanel, cards, attachedPermanent);
+                    attachments += attachmentLayoutInfos.getAttachments();
                     if (attachmentLayoutInfos.getColumns() > maxCol) {
                         maxCol = attachmentLayoutInfos.getColumns();
-                        attachments += attachmentLayoutInfos.getAttachments();
                     }
                 }
             }
