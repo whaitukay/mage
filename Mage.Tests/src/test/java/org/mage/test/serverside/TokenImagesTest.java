@@ -14,6 +14,10 @@ import mage.constants.PhaseStep;
 import mage.constants.SubType;
 import mage.constants.Zone;
 import mage.counters.CounterType;
+import mage.designations.CitysBlessing;
+import mage.designations.Designation;
+import mage.designations.Monarch;
+import mage.designations.Speed;
 import mage.game.permanent.Permanent;
 import mage.game.permanent.PermanentToken;
 import mage.game.permanent.token.HumanToken;
@@ -21,6 +25,7 @@ import mage.game.permanent.token.SoldierToken;
 import mage.game.permanent.token.Token;
 import mage.game.permanent.token.TokenImpl;
 import mage.game.permanent.token.custom.CreatureToken;
+import mage.game.stack.StackAbility;
 import mage.game.stack.Spell;
 import mage.util.CardUtil;
 import mage.view.CardView;
@@ -361,6 +366,35 @@ public class TokenImagesTest extends CardTestPlayerBase {
         Assert.assertEquals("client side", imagesNeed, imagesClient);
     }
 
+    private void assertDesignationImageInfo(String info, Designation designation, String imageFileName) {
+        String prefix = info + " - " + designation;
+
+        Assert.assertEquals(prefix + " - wrong set code", TokenRepository.XMAGE_TOKENS_SET_CODE, designation.getExpansionSetCode());
+        Assert.assertEquals(prefix + " - wrong card number", "0", designation.getCardNumber());
+        Assert.assertEquals(prefix + " - wrong image file name", imageFileName, designation.getImageFileName());
+        Assert.assertNotEquals(prefix + " - wrong image number", Integer.valueOf(0), designation.getImageNumber());
+    }
+
+    private void assertDesignationStackViewImageInfo(String info, Designation designation, String imageFileName) {
+        assertDesignationImageInfo(info + " server", designation, imageFileName);
+
+        StackAbility stackAbility = new StackAbility(designation.getAbilities().get(0), UUID.randomUUID());
+        CardView cardView = new CardView(designation, stackAbility);
+        String prefix = info + " client - " + designation;
+
+        Assert.assertEquals(prefix + " - wrong set code", TokenRepository.XMAGE_TOKENS_SET_CODE, cardView.getExpansionSetCode());
+        Assert.assertEquals(prefix + " - wrong card number", "0", cardView.getCardNumber());
+        Assert.assertEquals(prefix + " - wrong image file name", imageFileName, cardView.getImageFileName());
+        Assert.assertNotEquals(prefix + " - wrong image number", 0, cardView.getImageNumber());
+    }
+
+    @Test
+    public void test_Designation_MustGetXmageHelperImage() {
+        assertDesignationStackViewImageInfo("monarch designation", new Monarch(), TokenRepository.XMAGE_IMAGE_NAME_THE_MONARCH);
+        assertDesignationImageInfo("city's blessing designation", new CitysBlessing(), TokenRepository.XMAGE_IMAGE_NAME_CITY_BLESSING);
+        assertDesignationStackViewImageInfo("speed designation", new Speed(), TokenRepository.XMAGE_IMAGE_NAME_SPEED);
+    }
+
     @Test
     public void test_TokenExists_MustGetSameSetCodeAsSourceCard_Soldier() {
         prepareCards_MemorialToGlory("40K=3", "DOM=5");
@@ -666,7 +700,7 @@ public class TokenImagesTest extends CardTestPlayerBase {
     public void test_CreatureToken_MustGetDefaultImage() {
         Ability ability = new SimpleActivatedAbility(
                 Zone.ALL,
-                new CreateTokenEffect(new CreatureToken(2, 2, "", SubType.HUMAN), 10),
+                new CreateTokenEffect(new CreatureToken(2, 2, "").withName("Test Creature Token"), 10),
                 new ManaCostsImpl<>("")
         );
         addCustomCardWithAbility("40K-test", playerA, ability);
@@ -681,7 +715,7 @@ public class TokenImagesTest extends CardTestPlayerBase {
         assertPermanentCount(playerA, 1 + 10); // 1 test card + 10 tokens
 
         assert_Inner("test", 0, 0, 1,
-                "Human Token", 10, false, "XMAGE=10");
+                "Test Creature Token", 10, false, "XMAGE=10");
     }
 
     @Test
