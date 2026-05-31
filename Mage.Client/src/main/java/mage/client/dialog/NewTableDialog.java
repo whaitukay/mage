@@ -499,6 +499,15 @@ public class NewTableDialog extends MageDialog {
         this.hideDialog();
     }
 
+    /**
+     * Handle the OK button: validate options, persist them, create a server table, and join AI players and the host.
+     *
+     * <p>If validation fails the method returns without side effects. If table creation fails an error dialog is shown
+     * and the method returns. If any AI player or the host fails to join the newly created table the table is removed
+     * and the local `table` reference is cleared. Exceptions during join or deck import are passed to {@code handleError}.
+     *
+     * @param evt the action event that triggered this handler
+     */
     private void btnOKActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnOKActionPerformed
 
         MatchOptions options = getMatchOptions();

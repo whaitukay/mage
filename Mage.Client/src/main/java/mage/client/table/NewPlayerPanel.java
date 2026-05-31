@@ -18,6 +18,13 @@ public class NewPlayerPanel extends javax.swing.JPanel {
     private final JFileChooser fcSelectDeck;
     private boolean allowRandomDeckFolder;
 
+    /**
+     * Constructs a NewPlayerPanel configured for creating and configuring an AI/computer player.
+     *
+     * Initializes Swing components, creates and configures the deck file chooser (disables "accept all"
+     * filter and adds a `*.dck` filter), sets the panel to disallow folder selection for random decks,
+     * clears the deck text field, and sets the player name field from the default computer name.
+     */
     public NewPlayerPanel() {
         initComponents();
         fcSelectDeck = new JFileChooser();
@@ -34,6 +41,14 @@ public class NewPlayerPanel extends javax.swing.JPanel {
         this.txtPlayerName.setEnabled(false);
     }
     
+    /**
+     * Prompts the user with a file chooser to select a deck file or (if allowed) a deck folder,
+     * writes the chosen path into the player deck text field, and saves the chosen directory to preferences.
+     *
+     * The chooser's approve button label reflects whether folder selection is permitted. If the user approves,
+     * the selected file's path is set into {@code txtPlayerDeck} and the selection's canonical path is stored
+     * under the preference key "lastDeckFolder". Any {@link IOException} thrown while saving the preference is ignored.
+     */
     protected void playerLoadDeck() {
         String lastFolder = MageFrame.getPreferences().get("lastDeckFolder", "");
         if (!lastFolder.isEmpty()) {
@@ -86,6 +101,14 @@ public class NewPlayerPanel extends javax.swing.JPanel {
         this.lblLevel.setVisible(show);
     }
 
+    /**
+     * Shows or hides the deck-related UI controls.
+     *
+     * When shown or hidden, this affects the deck label, deck text field, the Generate button,
+     * and the deck Browse button.
+     *
+     * @param show true to make the deck controls visible, false to hide them
+     */
     public void showDeckElements(boolean show) {
         this.lblPlayerDeck.setVisible(show);
         this.txtPlayerDeck.setVisible(show);
@@ -93,6 +116,15 @@ public class NewPlayerPanel extends javax.swing.JPanel {
         this.btnPlayerDeck.setVisible(show);
     }
 
+    /**
+     * Configure whether the deck chooser accepts directories in addition to individual deck files.
+     *
+     * When enabled, the file chooser will allow selecting folders (for recursive random deck selection)
+     * and the UI label/tooltips will reflect that behavior; when disabled, only individual `.dck` files
+     * may be selected.
+     *
+     * @param allowRandomDeckFolder true to allow selecting directories for recursive random deck selection, false to allow only `.dck` files
+     */
     public void setAllowRandomDeckFolder(boolean allowRandomDeckFolder) {
         this.allowRandomDeckFolder = allowRandomDeckFolder;
         this.fcSelectDeck.setFileSelectionMode(
