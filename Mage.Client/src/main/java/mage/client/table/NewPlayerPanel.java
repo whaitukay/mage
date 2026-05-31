@@ -16,12 +16,14 @@ import mage.client.util.ClientDefaultSettings;
 public class NewPlayerPanel extends javax.swing.JPanel {
 
     private final JFileChooser fcSelectDeck;
+    private boolean allowRandomDeckFolder;
 
     public NewPlayerPanel() {
         initComponents();
         fcSelectDeck = new JFileChooser();
         fcSelectDeck.setAcceptAllFileFilterUsed(false);
         fcSelectDeck.addChoosableFileFilter(new DeckFileFilter("dck", "XMage's deck files (*.dck)"));
+        setAllowRandomDeckFolder(false);
         this.txtPlayerDeck.setText("");
         this.txtPlayerName.setText(ClientDefaultSettings.computerName);
     }
@@ -37,7 +39,9 @@ public class NewPlayerPanel extends javax.swing.JPanel {
         if (!lastFolder.isEmpty()) {
             fcSelectDeck.setCurrentDirectory(new File(lastFolder));
         }
-        int ret = fcSelectDeck.showDialog(this, "Select Deck");
+        int ret = fcSelectDeck.showDialog(
+                this,
+                allowRandomDeckFolder ? "Select Deck or Folder" : "Select Deck");
         if (ret == JFileChooser.APPROVE_OPTION) {
             File file = fcSelectDeck.getSelectedFile();
             this.txtPlayerDeck.setText(file.getPath());
@@ -87,6 +91,17 @@ public class NewPlayerPanel extends javax.swing.JPanel {
         this.txtPlayerDeck.setVisible(show);
         this.btnGenerate.setVisible(show);
         this.btnPlayerDeck.setVisible(show);
+    }
+
+    public void setAllowRandomDeckFolder(boolean allowRandomDeckFolder) {
+        this.allowRandomDeckFolder = allowRandomDeckFolder;
+        this.fcSelectDeck.setFileSelectionMode(
+                allowRandomDeckFolder ? JFileChooser.FILES_AND_DIRECTORIES : JFileChooser.FILES_ONLY);
+        this.lblPlayerDeck.setText(allowRandomDeckFolder ? "Deck/folder:" : "Deck:");
+        this.txtPlayerDeck.setToolTipText(allowRandomDeckFolder
+                ? "Select a .dck file, or a folder to choose a random .dck file recursively for this AI player."
+                : "Select a .dck deck file.");
+        this.btnPlayerDeck.setToolTipText(this.txtPlayerDeck.getToolTipText());
     }
 
     /**

@@ -24,7 +24,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -515,9 +517,10 @@ public class NewTableDialog extends MageDialog {
         }
         try {
             // join AI
+            Set<String> usedAiDeckPaths = new HashSet<>();
             for (TablePlayerPanel player : players) {
                 if (player.getPlayerType() != PlayerType.HUMAN) {
-                    if (!player.joinTable(roomId, table.getTableId())) {
+                    if (!player.joinTable(roomId, table.getTableId(), usedAiDeckPaths)) {
                         // error message must be sent by a server
                         SessionHandler.removeTable(roomId, table.getTableId());
                         table = null;

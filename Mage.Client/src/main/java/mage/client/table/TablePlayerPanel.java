@@ -9,6 +9,8 @@ import mage.players.PlayerType;
 
 import javax.swing.*;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -20,6 +22,7 @@ public class TablePlayerPanel extends javax.swing.JPanel {
 
     public TablePlayerPanel() {
         initComponents();
+        this.newPlayerPanel.setAllowRandomDeckFolder(true);
         this.newPlayerPanel.setVisible(false);
     }
 
@@ -46,8 +49,20 @@ public class TablePlayerPanel extends javax.swing.JPanel {
     }
 
     public boolean joinTable(UUID roomId, UUID tableId) throws IOException, ClassNotFoundException {
+        return joinTable(roomId, tableId, new HashSet<>());
+    }
+
+    public boolean joinTable(UUID roomId, UUID tableId, Set<String> usedDeckPaths) throws IOException, ClassNotFoundException {
         if (this.cbPlayerType.getSelectedItem() != PlayerType.HUMAN) {
-            return SessionHandler.joinTable(roomId, tableId, this.newPlayerPanel.getPlayerName(), (PlayerType) this.cbPlayerType.getSelectedItem(), this.newPlayerPanel.getSkillLevel(), DeckImporter.importDeckFromFile(this.newPlayerPanel.getDeckFile(), true), "");
+            String deckFile = RandomDeckSelector.resolveDeckPath(this.newPlayerPanel.getDeckFile(), usedDeckPaths);
+            return SessionHandler.joinTable(
+                    roomId,
+                    tableId,
+                    this.newPlayerPanel.getPlayerName(),
+                    (PlayerType) this.cbPlayerType.getSelectedItem(),
+                    this.newPlayerPanel.getSkillLevel(),
+                    DeckImporter.importDeckFromFile(deckFile, true),
+                    "");
         }
         return true;
     }
