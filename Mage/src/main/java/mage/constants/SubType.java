@@ -7,6 +7,8 @@ import mage.game.Game;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import org.apache.log4j.Logger;
+
 public enum SubType {
     //205.3k Instants and sorceries share their lists of subtypes; these subtypes are called spell types.
     ADVENTURE("Adventure", SubTypeSet.SpellType),
@@ -247,6 +249,7 @@ public enum SubType {
     ILLUSION("Illusion", SubTypeSet.CreatureType),
     IMP("Imp", SubTypeSet.CreatureType),
     INCARNATION("Incarnation", SubTypeSet.CreatureType),
+    INHUMAN("Inhuman", SubTypeSet.CreatureType),
     INKLING("Inkling", SubTypeSet.CreatureType),
     INQUISITOR("Inquisitor", SubTypeSet.CreatureType),
     INSECT("Insect", SubTypeSet.CreatureType),
@@ -391,6 +394,7 @@ public enum SubType {
     SHAPESHIFTER("Shapeshifter", SubTypeSet.CreatureType),
     SHARK("Shark", SubTypeSet.CreatureType),
     SHEEP("Sheep", SubTypeSet.CreatureType),
+    SHIAR("Shi'ar", SubTypeSet.CreatureType),
     SIREN("Siren", SubTypeSet.CreatureType),
     SITH("Sith", SubTypeSet.CreatureType),
     SKELETON("Skeleton", SubTypeSet.CreatureType),
@@ -570,6 +574,8 @@ public enum SubType {
     YODA("Yoda", SubTypeSet.PlaneswalkerType, true),  // Star Wars,
     ZARIEL("Zariel", SubTypeSet.PlaneswalkerType);
 
+    private static final Logger LOGGER = Logger.getLogger(SubType.class);
+
     public static class SubTypePredicate implements Predicate<MageObject> {
 
         private final SubType subtype;
@@ -667,17 +673,21 @@ public enum SubType {
             }
         }
 
-        throw new IllegalArgumentException("Can''t find subtype enum value: " + value);
+        throw new IllegalArgumentException("Can''t find subtype enum value in fromString: " + value);
     }
 
     public static SubType byDescription(String subType) {
+        if (subType == null) {
+            return null;
+        }
+
         for (SubType s : values()) {
             if (s.getDescription().equals(subType)) {
                 return s;
             }
         }
-        org.apache.log4j.Logger.getLogger(SubType.class).error("no subtype for " + subType + " exists");
-        return null;
+
+        throw new IllegalArgumentException("Can't find subtype enum value in byDescription: " + subType);
     }
 
     public SubTypeSet getSubTypeSet() {

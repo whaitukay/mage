@@ -135,6 +135,13 @@ class IntermediateChirographyWatcher extends Watcher {
         players.clear();
     }
 
+    static boolean checkPlayer(Game game, Ability source) {
+        return game
+                .getState()
+                .getWatcher(IntermediateChirographyWatcher.class)
+                .players
+                .contains(source.getControllerId());
+      
     boolean modifiedCreatureDied(UUID playerId) {
         return players.contains(playerId);
     }
