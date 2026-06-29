@@ -34,6 +34,8 @@ import java.util.stream.Collectors;
  */
 public abstract class TokenImpl extends MageObjectImpl implements Token {
 
+    private static final Logger logger = Logger.getLogger(TokenImpl.class);
+
     protected String description;
     private final ArrayList<UUID> lastAddedTokenIds = new ArrayList<>();
 
@@ -317,7 +319,7 @@ public abstract class TokenImpl extends MageObjectImpl implements Token {
         lastAddedTokenIds.clear();
 
         if (tokens == null || tokens.get(0) != this) {
-            throw new IllegalArgumentException("Wrong code usage. token.putOntoBattlefield parameter tokens must be initialized to a list of all tokens to be made, with the first element being the token you are calling putOntoBattlefield() on.");
+            throw new IllegalArgumentException("Wrong code usage. token.putOntoBattlefield parameter tokens must be initialized to a list of all tokens to be made, with the first element being the token");
         }
 
         CreateTokenEvent event = new CreateTokenEvent(source, controllerId, amount, tokens);
