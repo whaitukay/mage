@@ -1,20 +1,5 @@
 package mage.cards.i;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
-
-import mage.constants.SubType;
-import mage.filter.predicate.permanent.ModifiedPredicate;
-import mage.constants.TargetController;
-import mage.constants.WatcherScope;
-import mage.counters.CounterType;
-import mage.game.Game;
-import mage.game.events.GameEvent;
-import mage.game.events.ZoneChangeEvent;
-import mage.game.permanent.token.InklingToken;
-import mage.target.common.TargetControlledCreaturePermanent;
-import mage.watchers.Watcher;
 import mage.abilities.Ability;
 import mage.abilities.common.EntersBattlefieldTriggeredAbility;
 import mage.abilities.common.LoseLifeFirstTimeEachTurnTriggeredAbility;
@@ -31,9 +16,24 @@ import mage.abilities.triggers.BeginningOfEndStepTriggeredAbility;
 import mage.cards.CardImpl;
 import mage.cards.CardSetInfo;
 import mage.constants.CardType;
+import mage.constants.SubType;
+import mage.constants.TargetController;
+import mage.constants.WatcherScope;
+import mage.counters.CounterType;
+import mage.filter.predicate.permanent.ModifiedPredicate;
+import mage.game.Game;
+import mage.game.events.GameEvent;
+import mage.game.events.ZoneChangeEvent;
+import mage.game.permanent.Permanent;
+import mage.game.permanent.token.InklingToken;
+import mage.target.common.TargetControlledCreaturePermanent;
+import mage.watchers.Watcher;
+
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 /**
- *
  * @author muz
  */
 public final class IntermediateChirography extends CardImpl {
@@ -53,7 +53,9 @@ public final class IntermediateChirography extends CardImpl {
         this.addAbility(new ClassLevelAbility(2, "{1}{B}"));
 
         // Whenever you lose life for the first time each turn, put a +1/+1 counter on target creature you control.
-        Ability ability = new LoseLifeFirstTimeEachTurnTriggeredAbility(new AddCountersTargetEffect(CounterType.P1P1.createInstance()));
+        Ability ability = new LoseLifeFirstTimeEachTurnTriggeredAbility(
+                new AddCountersTargetEffect(CounterType.P1P1.createInstance())
+        );
         ability.addTarget(new TargetControlledCreaturePermanent());
         this.addAbility(new SimpleStaticAbility(new GainClassAbilitySourceEffect(ability, 2)));
 
@@ -61,12 +63,12 @@ public final class IntermediateChirography extends CardImpl {
         this.addAbility(new ClassLevelAbility(3, "{2}{B}"));
 
         // At the beginning of each end step, if a modified creature died under your control this turn, create a 2/1 white and black Inkling creature token with flying.
-        ability = new BeginningOfEndStepTriggeredAbility(
-                TargetController.ANY,
-                new CreateTokenEffect(new InklingToken()),
-                false
-        ).withInterveningIf(IntermediateChirographyCondition.instance).addHint(IntermediateChirographyCondition.hint);
-        this.addAbility(new SimpleStaticAbility(new GainClassAbilitySourceEffect(ability, 3)), new IntermediateChirographyWatcher());
+        this.addAbility(new SimpleStaticAbility(new GainClassAbilitySourceEffect(
+                new BeginningOfEndStepTriggeredAbility(TargetController.ANY, new CreateTokenEffect(new InklingToken()), false)
+                        .withInterveningIf(IntermediateChirographyCondition.instance)
+                        .addHint(IntermediateChirographyCondition.getHint()),
+                3
+        )), new IntermediateChirographyWatcher());
     }
 
     private IntermediateChirography(final IntermediateChirography card) {
@@ -82,11 +84,16 @@ public final class IntermediateChirography extends CardImpl {
 enum IntermediateChirographyCondition implements Condition {
     instance;
 
-    static final Hint hint = new ConditionHint(instance);
+    private static final Hint hint = new ConditionHint(instance, "A modified creature died under your control this turn");
+
+    public static Hint getHint() {
+        return hint;
+    }
 
     @Override
     public boolean apply(Game game, Ability source) {
-        return IntermediateChirographyWatcher.checkPlayer(game, source);
+        IntermediateChirographyWatcher watcher = game.getState().getWatcher(IntermediateChirographyWatcher.class);
+        return watcher != null && watcher.modifiedCreatureDied(source.getControllerId());
     }
 
     @Override
@@ -108,12 +115,18 @@ class IntermediateChirographyWatcher extends Watcher {
         if (event.getType() != GameEvent.EventType.ZONE_CHANGE) {
             return;
         }
-        ZoneChangeEvent zEvent = (ZoneChangeEvent) event;
-        if (zEvent.isDiesEvent()
-                && zEvent.isPermanentMoved()
-                && ModifiedPredicate.instance.apply(zEvent.getTarget(), game)) {
-            players.add(zEvent.getTarget().getControllerId());
+        ZoneChangeEvent zce = (ZoneChangeEvent) event;
+        if (!zce.isDiesEvent()) {
+            return;
         }
+        Permanent permanent = game.getPermanentOrLKIBattlefield(event.getTargetId());
+        if (permanent == null) {
+            permanent = zce.getTarget();
+        }
+        if (permanent == null || !permanent.isCreature(game) || !ModifiedPredicate.instance.apply(permanent, game)) {
+            return;
+        }
+        players.add(permanent.getControllerId());
     }
 
     @Override
@@ -128,6 +141,8 @@ class IntermediateChirographyWatcher extends Watcher {
                 .getWatcher(IntermediateChirographyWatcher.class)
                 .players
                 .contains(source.getControllerId());
+      
+    boolean modifiedCreatureDied(UUID playerId) {
+        return players.contains(playerId);
     }
-
 }

@@ -14,7 +14,6 @@ import mage.game.permanent.token.Spirit32Token;
 import java.util.UUID;
 
 /**
- *
  * @author muz
  */
 public final class CeaselessConflict extends CardImpl {
@@ -40,7 +39,8 @@ class CeaselessConflictEffect extends OneShotEffect {
 
     CeaselessConflictEffect() {
         super(Outcome.DestroyPermanent);
-        this.staticText = "destroy all creatures. Then create a 3/2 red and white Spirit creature token for each nontoken creature you controlled that was destroyed this way";
+        staticText = "destroy all creatures. Then create a 3/2 red and white Spirit creature token " +
+                "for each nontoken creature you controlled that was destroyed this way";
     }
 
     private CeaselessConflictEffect(final CeaselessConflictEffect effect) {
@@ -56,19 +56,18 @@ class CeaselessConflictEffect extends OneShotEffect {
     public boolean apply(Game game, Ability source) {
         int count = 0;
         for (Permanent permanent : game.getBattlefield().getActivePermanents(
-            StaticFilters.FILTER_PERMANENT_CREATURE,
-            source.getControllerId(), source, game
+                StaticFilters.FILTER_PERMANENT_CREATURE,
+                source.getControllerId(), source, game
         )) {
-            if (permanent.destroy(source, game) &&
-                permanent.isControlledBy(source.getControllerId()) &&
-                !permanent.isToken()
-            ) {
+            boolean controlledByYou = permanent.isControlledBy(source.getControllerId());
+            boolean nontoken = !permanent.isToken();
+            if (permanent.destroy(source, game) && controlledByYou && nontoken) {
                 count++;
             }
         }
         if (count > 0) {
             game.processAction();
-            new Spirit32Token().putOntoBattlefield(count, game, source, source.getControllerId(), true, false);
+            new Spirit32Token().putOntoBattlefield(count, game, source, source.getControllerId());
         }
         return true;
     }

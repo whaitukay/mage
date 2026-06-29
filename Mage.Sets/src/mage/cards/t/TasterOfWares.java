@@ -106,7 +106,7 @@ class TasterOfWaresEffect extends OneShotEffect {
                 card = cards.getRandom(game);
                 break;
             default:
-                TargetCard targetCard = new TargetCard(Zone.HAND, new FilterCard());
+                TargetCard targetCard = new TargetCard(Zone.HAND, new FilterCard()).withNotTarget(true);
                 targetCard.withChooseHint("to exile");
                 controller.choose(outcome, cards, targetCard, source, game);
                 card = game.getCard(targetCard.getFirstTarget());

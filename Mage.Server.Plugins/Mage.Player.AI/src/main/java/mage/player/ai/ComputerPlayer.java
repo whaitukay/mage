@@ -147,7 +147,7 @@ public class ComputerPlayer extends PlayerImpl {
             return false;
         }
 
-        PossibleTargetsSelector possibleTargetsSelector = new PossibleTargetsSelector(outcome, target, abilityControllerId, source, game);
+        PossibleTargetsSelector possibleTargetsSelector = createPossibleTargetsSelector(outcome, target, abilityControllerId, source, game);
         possibleTargetsSelector.findNewTargets(fromCards);
 
         // nothing to choose, e.g. no valid targets
@@ -245,7 +245,7 @@ public class ComputerPlayer extends PlayerImpl {
             return false;
         }
 
-        PossibleTargetsSelector possibleTargetsSelector = new PossibleTargetsSelector(outcome, target, abilityControllerId, source, game);
+        PossibleTargetsSelector possibleTargetsSelector = createPossibleTargetsSelector(outcome, target, abilityControllerId, source, game);
         possibleTargetsSelector.findNewTargets(null);
 
         // nothing to choose, e.g. no valid targets
@@ -388,6 +388,11 @@ public class ComputerPlayer extends PlayerImpl {
         // minimum implementation for do nothing
         pass(game);
         return false;
+    }
+
+    protected PossibleTargetsSelector createPossibleTargetsSelector(Outcome outcome, Target target,
+                                                                    UUID abilityControllerId, Ability source, Game game) {
+        return new PossibleTargetsSelector(outcome, target, abilityControllerId, source, game);
     }
 
     @Override
