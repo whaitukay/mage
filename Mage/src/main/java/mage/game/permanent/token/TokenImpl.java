@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
  */
 public abstract class TokenImpl extends MageObjectImpl implements Token {
 
-    private static final Logger logger = Logger.getLogger(MageObjectImpl.class);
+    private static final Logger logger = Logger.getLogger(TokenImpl.class);
 
     protected String description;
     private final ArrayList<UUID> lastAddedTokenIds = new ArrayList<>();
@@ -319,7 +319,7 @@ public abstract class TokenImpl extends MageObjectImpl implements Token {
         lastAddedTokenIds.clear();
 
         if (tokens == null || tokens.get(0) != this) {
-            throw new IllegalArgumentException("Wrong code usage. token.putOntoBattlefield parameter tokens must be initialized to a list of all tokens to be made, with the first element being the token you are calling putOntoBattlefield() on.");
+            throw new IllegalArgumentException("Wrong code usage. token.putOntoBattlefield parameter tokens must be initialized to a list of all tokens to be made, with the first element being the token");
         }
 
         CreateTokenEvent event = new CreateTokenEvent(source, controllerId, amount, tokens);
@@ -411,7 +411,7 @@ public abstract class TokenImpl extends MageObjectImpl implements Token {
                 game.getPermanentsEntering().put(newPermanent.getId(), newPermanent);
                 newPermanent.setTapped(tapped);
 
-                ZoneChangeEvent emptyEvent = new ZoneChangeEvent(newPermanent, newPermanent.getControllerId(), Zone.OUTSIDE, Zone.BATTLEFIELD);
+                ZoneChangeEvent emptyEvent = new ZoneChangeEvent(newPermanent, source, newPermanent.getControllerId(), Zone.OUTSIDE, Zone.BATTLEFIELD);
                 // tokens zcc must simulate card's zcc to keep copied card/spell settings
                 // (example: etb's kicker ability of copied creature spell, see tests with Deathforge Shaman)
                 newPermanent.updateZoneChangeCounter(game, emptyEvent);
@@ -446,7 +446,7 @@ public abstract class TokenImpl extends MageObjectImpl implements Token {
                 }
 
                 // created token events
-                ZoneChangeEvent zccEvent = new ZoneChangeEvent(permanent, permanent.getControllerId(), Zone.OUTSIDE, Zone.BATTLEFIELD);
+                ZoneChangeEvent zccEvent = new ZoneChangeEvent(permanent, source, permanent.getControllerId(), Zone.OUTSIDE, Zone.BATTLEFIELD);
                 game.addSimultaneousEvent(zccEvent);
                 if (permanent instanceof PermanentToken && created) {
                     game.addSimultaneousEvent(new CreatedTokenEvent(source, (PermanentToken) permanent));
